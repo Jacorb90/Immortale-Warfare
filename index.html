@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<head>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script defer type="text/javascript" src="js/jQuery.min.js"></script>
+	<script defer type="text/javascript" src="js/notify.min.js"></script>
+	<script defer type="text/javascript" src="js/functions.js"></script>
+	<script defer type="text/javascript" src="js/constants.js"></script>
+	<script defer type="text/javascript" src="js/classes/Cipher.js"></script>
+	<script defer type="text/javascript" src="js/classes/Card.js"></script>
+	<script defer type="text/javascript" src="js/classes/Player.js"></script>
+	<script defer type="text/javascript" src="js/classes/Game.js"></script>
+	<script defer type="text/javascript" src="js/classes/PvE.js"></script>
+	<script defer type="text/javascript" src="js/classes/Editor.js"></script>
+	<script defer type="text/javascript" src="js/main.js"></script>
+	<title>Immortal Warfare</title>
+	<link rel="shortcut icon" href="images/icon.ico"/>
+</head>
+<body>
+	<table id="menus" style="display: none;">
+		<tr>
+			<td><button id="gametabbtn" class="btn menubtn disabled" onclick="openMenu('game')">Main Game</button></td>
+			<td><button id="decktabbtn" class="btn menubtn" onclick="openMenu('deck')">Deck</button></td>
+			<td><button id="editortabbtn" class="btn menubtn" onclick="openMenu('editor')">Card Creation</button></td>
+			<td><button id="abilitiestabbtn" class="btn menubtn" onclick="openMenu('abilities')">Ability Descriptions</button></td>
+		</tr>
+	</table>
+	<div id="menuPush" style="height: 30px;"></div>
+	<div id="game" class="menu">
+		<div id="mainMenu" class="gameMenu" style="text-align: center;">
+			<br><br><br><br><br>
+			<b>Immortal Warfare</b><br><br><br>
+			<table style="margin: auto;">
+				<tr>
+					<td> <!--<button class="btn" onclick="startMode('PvP')">PvP</button>-->
+					<button class="btn" onclick="startMode('PvE')">Main Game</button> <button class="btn" onclick="startMode('PvE', true)">Sandbox Mode</button></td>
+				</tr>
+			</table>
+		</div>
+		<div id="battle" class="gameMenu" style="display: none;">
+			<div id="playerDiv">
+				<span id="playerHP"></span><br>
+				<span id="playerMana"></span><br>
+				<button id="playerNewCard" onclick="game.player.newCard()" class="btn disabled">New Card</button> <button id="playerEndTurn" onclick="game.player.endTurn()" class="btn disabled">End Turn</button> <button id="playerAttack" onclick="game.player.attackDirect()" class="btn disabled">Directly Attack Opponent</button><br>
+				<table style="margin-left: 0px !important;">
+					<tr>
+						<td id="playerPos1" class="card" style="opacity: 0" onclick="game.player.attack(1)"></td>
+						<td id="playerPos2" class="card" style="opacity: 0" onclick="game.player.attack(2)"></td>
+						<td id="playerPos3" class="card" style="opacity: 0" onclick="game.player.attack(3)"></td>
+						<td id="playerPos4" class="card" style="opacity: 0" onclick="game.player.attack(4)"></td>
+						<td id="playerPos5" class="card" style="opacity: 0" onclick="game.player.attack(5)"></td>
+					</tr>
+				</table>
+				<br>
+			</div><div id="enemyDiv">
+				<br>
+				<table style="margin-left: 0px !important;">
+					<tr>
+						<td id="enemyPos1" class="card" style="opacity: 0" onclick="game.enemy.attack(1)"></td>
+						<td id="enemyPos2" class="card" style="opacity: 0" onclick="game.enemy.attack(2)"></td>
+						<td id="enemyPos3" class="card" style="opacity: 0" onclick="game.enemy.attack(3)"></td>
+						<td id="enemyPos4" class="card" style="opacity: 0" onclick="game.enemy.attack(4)"></td>
+						<td id="enemyPos5" class="card" style="opacity: 0" onclick="game.enemy.attack(5)"></td>
+					</tr>
+				</table>
+				<button id="enemyNewCard" onclick="game.enemy.newCard()" class="btn">New Card</button> <button id="enemyEndTurn" onclick="game.enemy.endTurn()" class="btn">End Turn</button> <button id="enemyAttack" onclick="game.enemy.attackDirect()" class="btn disabled">Directly Attack Opponent</button><br>
+				<span id="enemyMana"></span><br>
+				<span id="enemyHP"></span>
+			</div><br><br><br>
+		</div>
+	</div><div id="editor" class="menu" style="display: none;" align="center">
+		<span id="editorTitle"></span><br><span id="skillPoints"></span><br>
+		<table>
+			<tr>
+				<td id="editorCard" class="card"></td>
+				<td style="opacity: 0" class="card"></td>
+				<td>Name: <span id="nameSet"></span><input id="rename" type="text" onchange="editor.editVal('name', this.value)"></input></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td>&#9829;: <input id="hpCostAdj" type="number" onchange="editor.editVal('hp', Math.max(this.value, 1))" min="1"></input></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td>&#9876;: <input id="powCostAdj" type="number" onchange="editor.editVal('pow', Math.max(this.value, 0))" min="0"></input></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td>&#128167;: <span id="manaCostFixed"></span><input id="manaCostAdj" type="number" onchange="editor.editVal('manaCost', Math.max(this.value, 0))" min="0"></input></td>
+			</tr>
+			<tr id="typeListRow">
+				<td></td>
+				<td></td>
+				<td>Order: <select id="typeList" onchange="if (!editor.startChar) editor.editVal('type', this.value==''?'mortal':this.value)"></select></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td>Abilities: <select id="abilityList" onchange="editor.update()"></select></td>
+				<td><button id="addAbility" onclick="editor.addAbility(document.getElementById('abilityList').value)">Add Ability<span id="addAbilityCost"></span></button></td>
+				<td><button id="removeAbility" onclick="editor.removeAbility()">Remove Ability</button></td>
+			</tr>
+		</table><br><br>
+		<button id="addCardTD" class="btn" onclick="editor.submit()">Add Card To Deck</button><br><br>
+	</div><div id="abilities" class="menu" style="display: none; text-align: center;">
+		<b>Abilities</b><br><br>
+		<ul id="listValues"></ul><br><br>
+	</div><div id="gameDone" class="menu" style="display: none; text-align: center;"><br><br><br><br><br><br>
+		<b>Congratulations! The <span id="winningPlayer"></span> player has won!!!</b><br><br>
+		<button id="playAgainTxt" class="btn" onclick="game.playAgain()">Play Again</button>
+	</div><div id="deck" class="menu" style="display: none; text-align: center;" align="center">
+		<b>Deck</b><br>
+		Click any card to delete it<br><br>
+		<div style="overflow-x: auto;">
+			<table>
+				<tr id="playerDeck"></tr>
+				<tr id="playerDeckSave"></tr>
+			</table>
+			<div id="playerFileInsert"></div><br><br>
+		</div>
+		<br><br>
+		<div style="overflow-x: auto;">
+			<table>
+				<tr id="enemyDeck"></tr>
+				<tr id="enemyDeckSave"></tr>
+			</table>
+			<div id="enemyFileInsert"></div><br><br>
+		</div>
+	</div><div id="stageMenu" class="menu" style="display: none; text-align: center;" align="center"></div>
+</body>
+</html>
