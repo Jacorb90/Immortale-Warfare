@@ -76,7 +76,7 @@ function getTotalSkillPoints() {
 	return Math.round(START_SP[editor.created.type]+LEVEL_INC[editor.created.type]*(level-1))
 }
 
-function getSkillPointsSpent() { return (editor.created.hp-1)+editor.created.pow+(editor.created.abilities.length>0?(editor.created.abilities.length>1?editor.created.abilities.reduce((x,y) => ABILITY_COSTS[x]+ABILITY_COSTS[y]):ABILITY_COSTS[editor.created.abilities[0]]):0) }
+function getSkillPointsSpent() { return (editor.created.hp-1)+editor.created.pow+(editor.created.abilities.length>0?(editor.created.abilities.length>1?editor.created.abilities.reduce((x,y) => (typeof x == "number" ? x : ABILITY_COSTS[x])+ABILITY_COSTS[y]):ABILITY_COSTS[editor.created.abilities[0]]):0) }
 
 function getSkillPoints() { return getTotalSkillPoints()-getSkillPointsSpent() }
 
